@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Photo</title>
+    <link rel="stylesheet" href="navbar.css">
+    <link rel="stylesheet" href="universal.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        main{
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            overflow-y: scroll;
+        }
+        .container {
+            position: sticky;
+            z-index: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #fff; /* White background */
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Darker box shadow */
+            text-align: center;
+            padding: 50px 10px;
+            width: 90vw;
+        }
+        
+        h2 {
+            color: #000; /* Black text */
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        #message {
+            display: none;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 12px;
+            background-color: transparent; /* Coral */
+            border: none;
+            border: solid 1px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 50%;
+            box-sizing: border-box;
+            font-size: 16px;
+            margin-top: 30px;
+        }
+        
+        button:hover {
+            background-color: black;
+            color: white; /* Light coral */
+        }
+        
+        input[type="text"] {
+            padding: 12px;
+            margin-top: 20px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            border-bottom: 2px solid #000; /* Black border bottom */
+            background-color: #fff; /* White background */
+            font-size: 16px;
+            color: #000; /* Black text */
+        }
+        
+        input[type="text"]::placeholder {
+            color: #999;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .spinner {
+            border-top: 4px solid #000; /* Black top border */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+        
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .howto{
+            margin-top: 65vh;
+            padding: 10px;
+            position: relative;
+            border-radius: 30px 30px 0px 0px;
+            z-index: 1;
+            background-color: white;
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+            height: 100vh;
+        }
+        .howto::before {
+            content: '';
+            width: 30px;
+            position: absolute;
+            left: 50%;
+            border-radius: 2px;
+            transform: translateX(-50%);
+            height: 5px;
+            background-color: rgb(209, 209, 209);
+        }
+        .one{
+            text-align: center;
+            margin-top: 10px;
+        }
+        .one img{
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<main>
+    <div class="container">
+        <h2>Change Photo</h2>
+        <div id="message"></div>
+        
+        <!-- Add the image URL input box -->
+        <input autocomplete="off" placeholder="Enter Image URL" type="text" id="imgUrl" name="imgUrl">
+        <br>
+        
+        <button onclick="sendData()">Change</button>
+     
+        <div id="loading" class="modal">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <div class="howto">
+        <div class="one">
+            <h3>Follow the Step</h3>
+            <img src="https://i.imgur.com/4Br3fbj.jpg" alt="">
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('message').style.display = 'none';
+
+    function sendData() {
+        // Retrieve input data from the input box
+        var imgUrl = document.getElementById('imgUrl').value;
+
+        // Check if the input box is empty
+        if (!imgUrl.trim()) {
+            document.getElementById('message').innerHTML = 'Image URL cannot be empty.';
+            document.getElementById('message').style.display = 'block'; // Show the error div
+            return; // Exit the function if input is empty
+        }
+
+        // Show loading modal
+        document.getElementById('loading').style.display = 'flex';
+
+        // Check if row index is stored in local storage
+        var rowIndex = localStorage.getItem('rowIndex');
+        if (rowIndex) {
+            // Send data to the Google Apps Script
+            var scriptUrl = 'https://script.google.com/macros/s/AKfycbx8leISZU_vJMUesOVD8AC9E3qXjb7tnv2q3UxHPJZyew6xWQSpEM8mATxUTzlvGSRY/exec';
+            var formData = new FormData();
+            formData.append('rowIndex', rowIndex);
+            formData.append('imgUrl', imgUrl);
+
+            fetch(scriptUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    // Display success or error message in the HTML
+                    document.getElementById('message').innerHTML = "Photo changed Successfully. Be patient img will change soon.";
+                    document.getElementById('message').style.display = 'block'; // Show the message div
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').innerHTML = 'Error occurred while sending the image URL.';
+                    document.getElementById('message').style.display = 'block'; // Show the error div
+                })
+                .finally(() => {
+                    // Hide loading modal
+                    document.getElementById('loading').style.display = 'none';
+                });
+        } else {
+            console.error('Row Index not found in local storage.');
+            document.getElementById('message').innerHTML = 'Unknown User';
+            document.getElementById('message').style.display = 'block'; // Show the error div
+            // Hide loading modal
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

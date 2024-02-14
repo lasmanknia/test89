@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #editableContent {
+      border: 2px solid #ccc;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="editableContent" contenteditable="true"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const editableContent = document.getElementById('editableContent');
+
+      // Load content from local storage if available
+      const savedContent = localStorage.getItem('editableContent');
+      if (savedContent) {
+        editableContent.innerHTML = savedContent;
+      }
+
+      // Auto-save content
+      editableContent.addEventListener('input', function() {
+        // Get the edited content
+        const editedContent = editableContent.innerHTML;
+
+        // Save the content to local storage
+        localStorage.setItem('editableContent', editedContent);
+      });
+    });
+  </script>
+</body>
+</html>
